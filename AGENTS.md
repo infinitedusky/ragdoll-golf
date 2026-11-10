@@ -3,7 +3,7 @@
 <!-- rogs-skills:begin config v1 -->
 ## Ticket lifecycle
 
-Tickets move through these skills, which hand off through status lines. None of them calls another; a person starts each stage. Their configuration lives in `docs/agents/`: `issue-tracker.md` (Self Evident, app Ragdoll Golf, key RG), `forge.md` (GitHub, infinitedusky/ragdoll-golf), `workflow.md` (verification, worktrees, and the features that are on: none) and `domain.md`.
+Tickets move through these skills, which hand off through status lines. None of them calls another; a person starts each stage. Their configuration lives in `docs/agents/`: `issue-tracker.md` (Self Evident, the app Ragdoll Golf (RG)), `forge.md` (GitHub, infinitedusky/ragdoll-golf), `workflow.md` (verification, worktrees, and the features that are on: none) and `domain.md`.
 
 ```
 create-ticket       audit the code, then draft and create tickets
@@ -30,5 +30,5 @@ finish-ticket       merge, verify, complete the tickets     Status: DONE
 - Every claim (CI is green, reviewed, verified) names the exact head SHA, and that head contains the current base. Only two things carry over to a later head, across clean merges of the base: a human verification step, as `finish-ticket` defines them, and browser-pass captures, as `browser-pass.md` allows.
 - After a plan is approved, "go" or "do it" means `work-ticket`, never a generic implementation flow.
 - When plan presentation is on, `present-plan` shows the settled plan after optional adversarial review. The user approves it in this conversation or with the viewer's Approve button on the current revision, which also means "go"; comments and ending the review never approve it.
-- Run `/setup-rogs` to change this configuration, or ask it to check the setup for drift.
+- Self Evident wrote this configuration from the app's settings and the repository: Set up what's missing under Integrations › tkt writes it again.
 <!-- rogs-skills:end -->
