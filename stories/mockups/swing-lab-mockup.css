@@ -1,0 +1,140 @@
+/* Mockup only (RG-1): a static drawing of the Swing Lab screen, no three.js. */
+.sl-mock {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  min-height: 520px;
+  font-family: var(--sans);
+  color: var(--text-h);
+  background: var(--bg);
+}
+
+.sl-mock__bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sl-mock__bar a {
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 15px;
+}
+
+.sl-mock__bar h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.sl-mock__view {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  background: linear-gradient(#bcd7ee 0%, #e6eef5 55%, #e6eef5 100%);
+  cursor: grab;
+}
+
+/* Ground plane: a grid drawn in perspective below a horizon at 55%. */
+.sl-mock__ground {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 55%;
+  bottom: 0;
+  width: 100%;
+  height: 45%;
+}
+
+.sl-mock__golfer {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  bottom: 6%;
+  height: 78%;
+  transform: translateX(-50%);
+}
+
+.sl-mock__chip {
+  position: absolute;
+  z-index: 1;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(8, 6, 13, 0.6);
+  color: #fff;
+  font-size: 13px;
+}
+
+.sl-mock__hint { left: 16px; bottom: 16px; }
+.sl-mock__credit { right: 16px; bottom: 16px; opacity: 0.8; }
+
+.sl-mock__gizmo {
+  position: absolute;
+  z-index: 1;
+  top: 16px;
+  right: 16px;
+  width: 64px;
+  height: 64px;
+}
+
+.sl-mock__center {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #08060d;
+  text-align: center;
+}
+
+.sl-mock__spinner {
+  width: 36px;
+  height: 36px;
+  border: 4px solid rgba(8, 6, 13, 0.15);
+  border-top-color: #aa3bff;
+  border-radius: 50%;
+  animation: sl-mock-spin 0.9s linear infinite;
+}
+
+@keyframes sl-mock-spin {
+  to { transform: rotate(360deg); }
+}
+
+.sl-mock__card {
+  max-width: 360px;
+  padding: 20px 24px;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: var(--shadow);
+}
+
+.sl-mock__card h2 { margin: 0 0 6px; font-size: 18px; }
+.sl-mock__card p { margin: 0 0 14px; font-size: 14px; color: #6b6375; }
+.sl-mock__card code { font-size: 12px; }
+
+.sl-mock__btn {
+  padding: 8px 16px;
+  border: 1px solid #aa3bff;
+  border-radius: 8px;
+  background: rgba(170, 59, 255, 0.1);
+  color: #aa3bff;
+  font: inherit;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.sl-mock__entry {
+  display: inline-block;
+  margin: 16px 0 32px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 16px;
+  text-decoration: none;
+}
