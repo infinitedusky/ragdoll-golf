@@ -6,9 +6,21 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "devDependencies": {
-    "vite": "^8.3.6"
+    "@storybook/addon-docs": "^10.6.6",
+    "@storybook/addon-vitest": "^10.6.6",
+    "@storybook/react-vite": "^10.6.6",
+    "@vitest/browser-playwright": "^5.1.0",
+    "@zigbang/storybook-addon-story-flow": "^0.10.0",
+    "playwright": "^1.65.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "storybook": "^10.6.6",
+    "vite": "^8.3.6",
+    "vitest": "^5.1.0"
   }
 }

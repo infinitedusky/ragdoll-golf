@@ -1,0 +1,19 @@
+{
+  "$schema": "https://zigbang.github.io/storybook-addon-story-flow/flow.schema.json",
+  "epic": "Game",
+  "title": "Game/Map",
+  "scenarios": [{ "id": "launch", "label": "Open the game" }],
+  "nodes": [
+    {
+      "id": "home",
+      "data": {
+        "label": "Home",
+        "coverage": "existing",
+        "tags": ["/"],
+        "stories": [{ "id": "screens-home--default", "label": "Default" }],
+        "scenarios": ["launch"]
+      }
+    }
+  ],
+  "edges": []
+}
