@@ -3,7 +3,7 @@
 <!-- rogs-skills:begin config v1 -->
 ## Ticket lifecycle
 
-Tickets move through these skills, which hand off through status lines. None of them calls another; a person starts each stage. Their configuration lives in `docs/agents/`: `issue-tracker.md` (Self Evident, the app Ragdoll Golf (RG)), `forge.md` (GitHub, infinitedusky/ragdoll-golf), `workflow.md` (verification, worktrees, and the features that are on: none) and `domain.md`.
+Tickets move through these skills, which hand off through status lines. None of them calls another; a person starts each stage. Their configuration lives in `docs/agents/`: `issue-tracker.md` (Linear, the team Personal (RSA)), `forge.md` (GitHub, infinitedusky/ragdoll-golf), `workflow.md` (verification, worktrees, and the features that are on: none) and `domain.md`.
 
 ```
 create-ticket       audit the code, then draft and create tickets
