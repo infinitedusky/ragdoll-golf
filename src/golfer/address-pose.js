@@ -1,61 +1,27 @@
-// PROTOTYPE (RG-1): the address pose, solved by scripts/solve-address.mjs (body by hand, arms by two-bone IK).
-// Local Euler XYZ in degrees, by bone name without the mixamorig: prefix. Bones not listed stay at bind (0, 0, 0).
+// PROTOTYPE (RG-1): the address pose, solved by scripts/solve-address.mjs on the dummy skeleton (body by hand, arms by two-bone IK).
+// Local Euler XYZ in degrees relative to the rest pose; bones not listed stay at rest.
 export const ADDRESS_POSE = {
-  Hips: [28, 0, 0],
-  Spine: [10, 0, 9],
-  Spine1: [6, 0, 6],
-  Spine2: [4, 0, 4],
-  Neck: [-14, 0, -8],
-  Head: [-14, 0, -10],
-  LeftShoulder: [0, -10, -12],
-  LeftArm: [-44.3, 8.9, -92.3],
-  LeftForeArm: [0, -41.7, 0],
-  LeftHand: [-14.7, 6.9, 4.8],
-  RightShoulder: [0, 30, 26],
-  RightArm: [-52.2, 23.2, 56.6],
-  RightForeArm: [0, 25.7, 0],
-  RightHand: [6.9, -13.9, -17.5],
-  LeftUpLeg: [-50, 0, 7],
-  LeftLeg: [34, 0, 0],
-  LeftFoot: [-12, -8, -7],
-  RightUpLeg: [-50, 0, -7],
-  RightLeg: [34, 0, 0],
-  RightFoot: [-12, 8, 7],
-  // Fingers wrap the grip: bend about Z toward the palm (left −Z, right +Z)
-  LeftHandIndex1: [0, 4, -55],
-  LeftHandIndex2: [0, 0, -75],
-  LeftHandIndex3: [0, 0, -45],
-  LeftHandMiddle1: [0, 0, -55],
-  LeftHandMiddle2: [0, 0, -75],
-  LeftHandMiddle3: [0, 0, -45],
-  LeftHandRing1: [0, -4, -55],
-  LeftHandRing2: [0, 0, -75],
-  LeftHandRing3: [0, 0, -45],
-  LeftHandPinky1: [0, -8, -55],
-  LeftHandPinky2: [0, 0, -75],
-  LeftHandPinky3: [0, 0, -45],
-  LeftHandThumb1: [20, 25, -10],
-  LeftHandThumb2: [0, 0, -25],
-  LeftHandThumb3: [0, 0, -20],
-  RightHandIndex1: [0, -4, 55],
-  RightHandIndex2: [0, 0, 75],
-  RightHandIndex3: [0, 0, 45],
-  RightHandMiddle1: [0, 0, 55],
-  RightHandMiddle2: [0, 0, 75],
-  RightHandMiddle3: [0, 0, 45],
-  RightHandRing1: [0, 4, 55],
-  RightHandRing2: [0, 0, 75],
-  RightHandRing3: [0, 0, 45],
-  RightHandPinky1: [0, 8, 55],
-  RightHandPinky2: [0, 0, 75],
-  RightHandPinky3: [0, 0, 45],
-  RightHandThumb1: [-20, -25, 10],
-  RightHandThumb2: [0, 0, 25],
-  RightHandThumb3: [0, 0, 20],
+  pelvis: [30, 0, 0],
+  lowerBack: [5, 8, 6],
+  upperBack: [3, 10, 5],
+  neck: [-14, 0, -6],
+  head: [-10, 0, -4],
+  leadShoulder: [-63.2, -36.6, -24.1],
+  leadElbow: [-36.6, 0, 0],
+  leadWrist: [15.7, 33.4, 10.2],
+  trailShoulder: [-44.8, 49.9, -12.8],
+  trailElbow: [-32.5, 0, 0],
+  trailWrist: [15.2, -48.8, -26.3],
+  leadHip: [-48, 0, 7],
+  leadKnee: [34, 0, 0],
+  leadAnkle: [-14.5, 11.7, -6.8],
+  trailHip: [-48, 0, -7],
+  trailKnee: [34, 0, 0],
+  trailAnkle: [-15.2, -5.8, 6.7],
 }
 
-// Where the model root stands, metres (feet on the ground, left arm nearly straight)
-export const GOLFER_ROOT = [0, -0.0539, 0.0867]
+// Where the pelvis (the root bone) stands, metres: feet flat on the ground, arms nearly straight
+export const ADDRESS_ROOT = [0, 0.895, 0.0202]
 
-// The club in the RightHand bone frame (that frame is in centimetres: the GLB root scales by 0.01)
-export const CLUB_IN_RIGHT_HAND = {position: [-95.799,-3.163,4.959],quaternion: [0.13753,-0.19828,-0.67874,0.6936],scale: 100}
+// The club in the trail wrist's frame (metres, unit quaternion)
+export const CLUB_IN_TRAIL_WRIST = { position: [0.04, -0.8301, -0.0028], quaternion: [0.23769, 0, 0, 0.97134] }

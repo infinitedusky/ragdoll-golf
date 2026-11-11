@@ -1,15 +1,12 @@
 {
- "root": [0, 0, 0],
  "club": [0.026, 0, 0.906],
- "toeHeight": 0.012,
- "leftReach": 0.975,
+ "reach": 0.96,
+ "footYawDeg": { "lead": 14, "trail": -8 },
  "bones": {
-  "Hips": [28, 0, 0],
-  "Spine": [10, 0, 9], "Spine1": [6, 0, 6], "Spine2": [4, 0, 4],
-  "Neck": [-14, 0, -8], "Head": [-14, 0, -10],
-  "LeftShoulder": [0, -10, -12], "RightShoulder": [0, 30, 26],
-  "LeftUpLeg": [-50, 0, 7], "RightUpLeg": [-50, 0, -7],
-  "LeftLeg": [34, 0, 0], "RightLeg": [34, 0, 0],
-  "LeftFoot": [-12, -8, -7], "RightFoot": [-12, 8, 7]
+  "pelvis": [30, 0, 0],
+  "lowerBack": [5, 8, 6], "upperBack": [3, 10, 5],
+  "neck": [-14, 0, -6], "head": [-10, 0, -4],
+  "leadHip": [-48, 0, 7], "trailHip": [-48, 0, -7],
+  "leadKnee": [34, 0, 0], "trailKnee": [34, 0, 0]
  }
 }

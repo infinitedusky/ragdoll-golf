@@ -1,11 +1,11 @@
-// PROTOTYPE (RG-1): Swing Lab — a real rigged golfer at address, with the skeleton panel driving its joints.
+// PROTOTYPE (RG-1): Swing Lab — a crash-test dummy on our own skeleton at address, with the body panel driving its joints.
 // Conventions: the golfer faces +Z, the target line runs along +X, units are metres.
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { buildClub, CLUB } from '../golfer/club.js'
-import { createSkeleton, worldPosition } from '../golfer/skeleton.js'
-import { ADDRESS_POSE, GOLFER_ROOT, CLUB_IN_RIGHT_HAND } from '../golfer/address-pose.js'
+import { buildDummy } from '../golfer/dummy.js'
+import { createSkeleton } from '../golfer/skeleton.js'
+import { ADDRESS_POSE, ADDRESS_ROOT, CLUB_IN_TRAIL_WRIST } from '../golfer/address-pose.js'
 import './swing-lab.css'
 
 export const VIEWS = {
@@ -14,8 +14,6 @@ export const VIEWS = {
   top: { label: 'Top', pos: [0, 6, 0.42], target: [0, 0, 0.4] },
   club: { label: 'Club head', pos: [0.32, 0.1, 1.12], target: [0.02, 0.02, 0.95] },
 }
-const LICENCE = 'Xbot.glb · Mixamo (Adobe) via three.js examples'
-const KEY_BONES = new Set(Object.keys(ADDRESS_POSE))
 
 export function renderSwingLab(root) {
   root.innerHTML = `
@@ -24,7 +22,7 @@ export function renderSwingLab(root) {
     <div class="swing-lab__top">
       <a href="/" data-link>← Home</a>
       <h1>Swing Lab</h1>
-      <span class="swing-lab__licence">at address · ${LICENCE}</span>
+      <span class="swing-lab__licence">at address · crash-test dummy, built in code</span>
     </div>
     <div class="swing-lab__hint">drag to orbit · scroll to zoom · right-drag to pan</div>
     <div class="swing-lab__bar" role="toolbar" aria-label="View">
@@ -34,14 +32,12 @@ export function renderSwingLab(root) {
       <button data-view="face" data-reset>Reset view</button>
     </div>
   </div>
-  <aside class="swing-lab__panel" aria-label="Skeleton">
+  <aside class="swing-lab__panel" aria-label="Body">
     <h2>Club</h2>
     <div class="swing-lab__bone">
       <span>${CLUB.name} · ${CLUB.lengthIn}″ · ${CLUB.loftDeg}° loft · ${CLUB.lieDeg}° lie</span>
-      <span class="swing-lab__value">in RightHand</span>
+      <span class="swing-lab__value">in trail hand</span>
     </div>
-    <h2 data-count>Skeleton · loading…</h2>
-    <label class="swing-lab__filter"><input type="checkbox" data-all> show fingers, eyes and ends</label>
     <button class="swing-lab__reset-pose" data-reset-pose>Reset to address</button>
     <div role="listbox" aria-label="Bones" data-bones></div>
   </aside>
@@ -63,18 +59,17 @@ export function renderSwingLab(root) {
 
   let selected = null
   const list = root.querySelector('[data-bones]')
-  const showAll = root.querySelector('[data-all]')
+  const skel = scene3d.skeleton
   const fmt = (r) => r.map((v) => Math.round(v)).join(' · ')
 
+  // Flat groups, ordered from the body outward
   function renderList() {
-    const skel = scene3d.skeleton
-    if (!skel) return
-    const bones = skel.list().filter((b) => showAll.checked || !/Thumb|Index|Middle|Ring|Pinky|Eye|_End/.test(b.name))
-    root.querySelector('[data-count]').textContent = `Skeleton · ${bones.length} of ${skel.list().length} bones`
-    list.innerHTML = bones.map(({ name, depth }) => `
+    list.innerHTML = skel.groups().map(({ group, bones }) => `
+      <h2>${group}</h2>
+      ${bones.map(({ name, label }) => `
       <div data-bone="${name}">
-        <button class="swing-lab__bone" role="option" aria-selected="${selected === name}" style="padding-left:${8 + depth * 8}px">
-          <span>${name}${KEY_BONES.has(name) ? '' : ' <i>bind</i>'}</span>
+        <button class="swing-lab__bone" role="option" aria-selected="${selected === name}">
+          <span>${label}</span>
           <span class="swing-lab__value">${fmt(skel.get(name))}</span>
         </button>
         ${selected === name ? ['X', 'Y', 'Z'].map((a, i) => `
@@ -82,8 +77,9 @@ export function renderSwingLab(root) {
             <input type="range" min="-180" max="180" step="0.5" value="${skel.get(name)[i]}" data-axis="${i}">
             <output>${skel.get(name)[i]}°</output>
           </label>`).join('') : ''}
-      </div>`).join('')
+      </div>`).join('')}`).join('')
   }
+  renderList()
 
   list.addEventListener('click', (e) => {
     const row = e.target.closest('.swing-lab__bone')
@@ -96,15 +92,13 @@ export function renderSwingLab(root) {
   list.addEventListener('input', (e) => {
     const i = e.target.dataset.axis
     if (i === undefined) return
-    const r = scene3d.skeleton.get(selected)
+    const r = skel.get(selected)
     r[i] = Number(e.target.value)
-    scene3d.skeleton.set(selected, r)
+    skel.set(selected, r)
     e.target.nextElementSibling.textContent = `${r[i]}°`
     list.querySelector(`[data-bone="${selected}"] .swing-lab__value`).textContent = fmt(r)
   })
-  showAll.addEventListener('change', renderList)
-  root.querySelector('[data-reset-pose]').addEventListener('click', () => { scene3d.skeleton.applyPose(ADDRESS_POSE); renderList() })
-  scene3d.ready.then(renderList)
+  root.querySelector('[data-reset-pose]').addEventListener('click', () => { skel.applyPose(ADDRESS_POSE); renderList() })
 
   return () => scene3d.dispose()
 }
@@ -145,55 +139,50 @@ function mountScene(container) {
   stripe.receiveShadow = true
   scene.add(stripe)
 
-  const api = { skeleton: null, onViewChange: null }
-  const materials = []
-  let helper = null, skeletonOn = false
+  const dummy = buildDummy()
+  const api = { skeleton: createSkeleton(dummy.bones), onViewChange: null }
   const marker = new THREE.Mesh(new THREE.SphereGeometry(0.03, 16, 12), new THREE.MeshBasicMaterial({ color: '#ffcf3f', depthTest: false, transparent: true, opacity: 0.85 }))
   marker.renderOrder = 3
   marker.visible = false
   scene.add(marker)
   let selectedBone = null
 
-  api.ready = new GLTFLoader().loadAsync('/models/golfer.glb').then((gltf) => {
-    const model = gltf.scene
-    model.position.fromArray(GOLFER_ROOT)
-    model.traverse((o) => {
-      if (o.isMesh) {
-        o.castShadow = o.receiveShadow = true
-        o.frustumCulled = false
-        for (const m of [o.material].flat()) { m.transparent = true; materials.push(m) }
-      }
-    })
-    scene.add(model)
-    api.skeleton = createSkeleton(model)
-    api.skeleton.applyPose(ADDRESS_POSE)
+  dummy.root.position.fromArray(ADDRESS_ROOT)
+  api.skeleton.applyPose(ADDRESS_POSE)
+  scene.add(dummy.root)
 
-    // Club in the right hand; the ball sits just in front of the face centre, where the pose puts the club
-    const { club, faceCentreAt } = buildClub()
-    club.position.fromArray(CLUB_IN_RIGHT_HAND.position)
-    club.quaternion.fromArray(CLUB_IN_RIGHT_HAND.quaternion)
-    club.scale.setScalar(CLUB_IN_RIGHT_HAND.scale)
-    api.skeleton.bone('RightHand').add(club)
-    scene.updateMatrixWorld(true)
-    const R = 0.0214
-    const face = club.localToWorld(faceCentreAt(R))
-    const ball = new THREE.Mesh(new THREE.SphereGeometry(R, 32, 24), new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.35 }))
-    ball.position.set(face.x + R + 0.003, R, face.z)
-    ball.castShadow = true
-    scene.add(ball)
+  // The club hangs off the trail wrist; the ball sits just in front of the face centre, where the pose puts the club
+  const { club, faceCentreAt } = buildClub()
+  club.position.fromArray(CLUB_IN_TRAIL_WRIST.position)
+  club.quaternion.fromArray(CLUB_IN_TRAIL_WRIST.quaternion)
+  dummy.bones.trailWrist.add(club)
+  scene.updateMatrixWorld(true)
+  const R = 0.0214
+  const face = club.localToWorld(faceCentreAt(R))
+  const ball = new THREE.Mesh(new THREE.SphereGeometry(R, 32, 24), new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.35 }))
+  ball.position.set(face.x + R + 0.003, R, face.z)
+  ball.castShadow = true
+  scene.add(ball)
 
-    helper = new THREE.SkeletonHelper(model)
-    helper.material.depthTest = false
-    helper.material.linewidth = 2
-    helper.renderOrder = 2
-    scene.add(helper)
-    setSkeleton(skeletonOn)
-  })
+  // Skeleton overlay: a joint ball on every bone, and the bone lines, drawn through the body
+  const jointMat = new THREE.MeshBasicMaterial({ color: '#ffcf3f', depthTest: false })
+  for (const b of Object.values(dummy.bones)) {
+    const j = new THREE.Mesh(new THREE.SphereGeometry(0.022, 12, 8), jointMat)
+    j.renderOrder = 2
+    j.visible = false
+    j.userData.joint = true
+    b.add(j)
+  }
+  const helper = new THREE.SkeletonHelper(dummy.root)
+  helper.material.depthTest = false
+  helper.renderOrder = 1
+  helper.visible = false
+  scene.add(helper)
 
   function setSkeleton(on) {
-    skeletonOn = on
-    if (helper) helper.visible = on
-    for (const m of materials) { m.opacity = on ? 0.3 : 1; m.depthWrite = !on }
+    helper.visible = on
+    dummy.root.traverse((o) => { if (o.userData.joint) o.visible = on })
+    for (const m of dummy.materials) { m.opacity = on ? 0.3 : 1; m.depthWrite = !on }
   }
 
   let tween = null
@@ -226,7 +215,7 @@ function mountScene(container) {
       if (k === 1) tween = null
     }
     controls.update()
-    if (selectedBone) marker.position.copy(worldPosition(selectedBone))
+    if (selectedBone) selectedBone.getWorldPosition(marker.position)
     renderer.render(scene, camera)
   })
 
