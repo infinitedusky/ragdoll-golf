@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { mountSwingLabScene, VIEWS, CLUB } from './scene.js'
 import './swing-lab.css'
 
-// MOCKUP (RG-1): the agreed Swing Lab screen (sketch B). The golfer is a capsule mannequin and the
-// bone values are made up; the build replaces both with the rigged GLB and its real skeleton.
+// MOCKUP (RG-1): the agreed Swing Lab screen (sketch B). The golfer is the crash-test dummy, posed point by
+// point; the bone values are made up. The build gives it a real skeleton we define.
 const BONES = [
   ['Hips', [0, 0, 0]], ['Spine', [28, 0, 0]], ['Spine2', [12, 0, 0]], ['Neck', [-20, 0, 0]],
   ['LeftArm', [62, -8, 4]], ['LeftForeArm', [6, 0, 0]], ['LeftHand', [0, 0, 0]],
@@ -41,7 +41,7 @@ function SwingLab({ view: initialView, skeleton: initialSkeleton, selectedBone }
         <div className="swing-lab__top">
           <a href="/">← Home</a>
           <h1>Swing Lab</h1>
-          <span className="swing-lab__licence">at address · golfer.glb (CC0)</span>
+          <span className="swing-lab__licence">at address · crash-test dummy</span>
         </div>
         <div className="swing-lab__hint">drag to orbit · scroll to zoom · right-drag to pan</div>
         <div className="swing-lab__bar" role="toolbar" aria-label="View">

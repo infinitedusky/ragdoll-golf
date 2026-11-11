@@ -1,7 +1,8 @@
-// MOCKUP (RG-1): the Swing Lab scene, with a capsule mannequin standing in for the rigged golfer.
+// MOCKUP (RG-1): the Swing Lab scene, with the golfer as a crash-test dummy built in code.
 // Conventions: the golfer faces +Z, the target line runs along +X, units are metres.
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js'
 
 const DEG = Math.PI / 180
 const Y = new THREE.Vector3(0, 1, 0)
@@ -31,43 +32,103 @@ const BONES = [
 
 function buildGolfer(J) {
   const body = new THREE.Group()
-  const skin = new THREE.MeshStandardMaterial({ color: '#d9b896', roughness: 0.7, transparent: true })
-  const shirt = new THREE.MeshStandardMaterial({ color: '#3f6c9e', roughness: 0.8, transparent: true })
-  const pants = new THREE.MeshStandardMaterial({ color: '#2d3640', roughness: 0.85, transparent: true })
-  const shoe = new THREE.MeshStandardMaterial({ color: '#f2f2f2', roughness: 0.5, transparent: true })
+  // Crash-test dummy: yellow rigid segments, black ball joints, a stacked rubber neck, target markers
+  const yellow = new THREE.MeshStandardMaterial({ color: '#f0bf2a', roughness: 0.45, metalness: 0.05, transparent: true })
+  const black = new THREE.MeshStandardMaterial({ color: '#1b1b1d', roughness: 0.55, transparent: true })
+  const neckRubber = new THREE.MeshStandardMaterial({ color: '#2a2a2c', roughness: 0.9, transparent: true })
+  const bolt = new THREE.MeshStandardMaterial({ color: '#9aa0a6', metalness: 0.8, roughness: 0.3, transparent: true })
 
+  const P = (p) => (p.isVector3 ? p : J[p])
   const add = (m) => { m.castShadow = m.receiveShadow = true; body.add(m); return m }
-  const limb = (a, b, r, mat) => {
-    const dir = new THREE.Vector3().subVectors(J[b], J[a])
-    const m = add(new THREE.Mesh(new THREE.CapsuleGeometry(r, Math.max(dir.length() - r, 0.01), 6, 16), mat))
-    m.position.copy(J[a]).addScaledVector(dir, 0.5)
+  // A segment from joint a to joint b, shortened at both ends so the joints show
+  function seg(a, b, r0, r1, mat, gap = 0.03) {
+    const A = P(a), B = P(b), dir = new THREE.Vector3().subVectors(B, A), len = dir.length() - 2 * gap
+    const m = add(new THREE.Mesh(new THREE.CylinderGeometry(r1, r0, len, 20, 1), mat))
+    m.position.copy(A).addScaledVector(dir, 0.5)
     m.quaternion.setFromUnitVectors(Y, dir.normalize())
-  }
-  const sphere = (p, r, mat) => {
-    const m = add(new THREE.Mesh(new THREE.SphereGeometry(r, 24, 16), mat))
-    m.position.copy(J[p])
     return m
   }
+  function block(a, b, w, d, r, mat, gap = 0) {
+    const A = P(a), B = P(b), dir = new THREE.Vector3().subVectors(B, A)
+    const m = add(new THREE.Mesh(new RoundedBoxGeometry(w, dir.length() - 2 * gap, d, 4, r), mat))
+    m.position.copy(A).addScaledVector(dir, 0.5)
+    m.quaternion.setFromUnitVectors(Y, dir.normalize())
+    return m
+  }
+  const joint = (p, r) => { const m = add(new THREE.Mesh(new THREE.SphereGeometry(r, 20, 14), black)); m.position.copy(P(p)); return m }
+  // Black-and-yellow quadrant target, facing along `normal`
+  function marker(pos, normal, r = 0.035) {
+    const g = new THREE.Group()
+    for (let i = 0; i < 4; i++) {
+      const q = new THREE.Mesh(new THREE.CircleGeometry(r, 12, i * Math.PI / 2, Math.PI / 2),
+        new THREE.MeshBasicMaterial({ color: i % 2 ? '#111' : '#ffd84a', side: THREE.DoubleSide }))
+      g.add(q)
+    }
+    g.position.copy(pos)
+    g.lookAt(pos.clone().add(normal))
+    body.add(g)
+  }
+  const mid = (a, b, t = 0.5) => P(a).clone().lerp(P(b), t)
 
-  limb('ankleL', 'kneeL', 0.06, pants); limb('kneeL', 'hipL', 0.075, pants)
-  limb('ankleR', 'kneeR', 0.06, pants); limb('kneeR', 'hipR', 0.075, pants)
-  limb('hipL', 'hipR', 0.11, pants)
-  limb('pelvis', 'chest', 0.15, shirt)
-  limb('shoulderL', 'shoulderR', 0.08, shirt)
-  limb('chest', 'neck', 0.05, skin)
-  limb('shoulderL', 'elbowL', 0.05, shirt); limb('elbowL', 'handL', 0.042, skin)
-  limb('shoulderR', 'elbowR', 0.05, shirt); limb('elbowR', 'handR', 0.042, skin)
-  sphere('handL', 0.045, skin); sphere('handR', 0.045, skin)
-  sphere('head', 0.11, skin).scale.set(0.9, 1.05, 1)
-  const cap = add(new THREE.Mesh(new THREE.SphereGeometry(0.115, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), shirt))
-  cap.position.copy(J.head)
-  cap.rotation.x = 0.5
-  for (const [a, side] of [['ankleL', 1], ['ankleR', -1]]) {
-    const f = add(new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.07, 0.27), shoe))
-    f.position.copy(J[a]).add(new THREE.Vector3(0.02 * side, -0.045, 0.06))
+  // Legs
+  for (const s of ['L', 'R']) {
+    seg('hip' + s, 'knee' + s, 0.075, 0.062, yellow)
+    seg('knee' + s, 'ankle' + s, 0.058, 0.045, yellow)
+    joint('hip' + s, 0.07); joint('knee' + s, 0.062); joint('ankle' + s, 0.045)
+    const side = s === 'L' ? 1 : -1
+    marker(P('knee' + s).clone().add(new THREE.Vector3(0.0, 0.0, 0.065)), new THREE.Vector3(0, 0.15, 1).normalize(), 0.03)
+    const f = add(new THREE.Mesh(new RoundedBoxGeometry(0.1, 0.07, 0.27, 3, 0.025), black))
+    f.position.copy(P('ankle' + s)).add(new THREE.Vector3(0.02 * side, -0.045, 0.06))
     f.rotation.y = 0.2 * side
   }
-  return { body, materials: [skin, shirt, pants, shoe] }
+  // Pelvis: a black block across the hip joints
+  const pelvis = add(new THREE.Mesh(new RoundedBoxGeometry(0.3, 0.16, 0.2, 4, 0.04), black))
+  pelvis.position.copy(J.pelvis).add(new THREE.Vector3(0, 0.02, 0))
+  pelvis.rotation.x = 0.35
+  // Lumbar: neckRubber cylinder, then the yellow chest block with ribs
+  seg('pelvis', mid('pelvis', 'chest', 0.35), 0.09, 0.09, neckRubber, 0.0)
+  const chest = block(mid('pelvis', 'chest', 0.3), J.chest, 0.36, 0.22, 0.06, yellow)
+  for (let i = 1; i <= 3; i++) {
+    const rib = add(new THREE.Mesh(new THREE.TorusGeometry(0.15, 0.008, 6, 32), black))
+    rib.position.copy(mid('pelvis', 'chest', 0.45 + i * 0.13))
+    rib.quaternion.copy(chest.quaternion).multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 2))
+    rib.scale.set(1.15, 0.72, 1)
+  }
+  marker(mid('pelvis', 'chest', 0.7).add(new THREE.Vector3(0.182, 0, 0)), new THREE.Vector3(1, 0, 0))
+  marker(mid('pelvis', 'chest', 0.7).add(new THREE.Vector3(-0.182, 0, 0)), new THREE.Vector3(-1, 0, 0))
+  // Neck: stacked neckRubber discs, then the head
+  const neckDir = new THREE.Vector3().subVectors(J.head, J.neck)
+  for (let i = 0; i < 4; i++) {
+    const d = add(new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.022, 20), i % 2 ? black : neckRubber))
+    d.position.copy(J.chest).lerp(J.neck, 0.3 + i * 0.25)
+    d.quaternion.setFromUnitVectors(Y, new THREE.Vector3().subVectors(J.neck, J.chest).normalize())
+  }
+  const head = add(new THREE.Mesh(new THREE.SphereGeometry(0.11, 32, 24), yellow))
+  head.position.copy(J.head)
+  head.scale.set(0.88, 1.08, 1)
+  marker(J.head.clone().add(new THREE.Vector3(0.098, 0.01, 0)), new THREE.Vector3(1, 0, 0), 0.04)
+  marker(J.head.clone().add(new THREE.Vector3(-0.098, 0.01, 0)), new THREE.Vector3(-1, 0, 0), 0.04)
+  // Arms
+  for (const s of ['L', 'R']) {
+    joint('shoulder' + s, 0.065)
+    seg('shoulder' + s, 'elbow' + s, 0.055, 0.048, yellow)
+    joint('elbow' + s, 0.05)
+    seg('elbow' + s, 'hand' + s, 0.046, 0.038, yellow, 0.035)
+    joint('hand' + s, 0.034)
+    // Bolt caps on the outside of each elbow and knee
+    for (const j of ['elbow' + s, 'knee' + s]) {
+      const c = add(new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.01, 12), bolt))
+      c.position.copy(J[j]).add(new THREE.Vector3((s === 'L' ? 1 : -1) * (j.startsWith('knee') ? 0.064 : 0.052), 0, 0))
+      c.rotation.z = Math.PI / 2
+    }
+  }
+  // Mitten hands, black, wrapped round the grip
+  for (const s of ['L', 'R']) {
+    const h = add(new THREE.Mesh(new RoundedBoxGeometry(0.075, 0.1, 0.05, 3, 0.02), black))
+    h.position.copy(J['hand' + s]).add(new THREE.Vector3(0, -0.045, 0.02))
+    h.rotation.x = 0.5
+  }
+  return { body, materials: [yellow, black, neckRubber, bolt] }
 }
 
 // A 7-iron in its own frame: origin at the heel of the sole, face toward +X, toe toward +Z,
