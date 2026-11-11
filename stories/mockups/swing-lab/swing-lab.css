@@ -1,0 +1,63 @@
+/* MOCKUP (RG-1): Swing Lab layout — scene on the left, skeleton panel on the right. */
+.swing-lab {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  font: 14px/1.4 system-ui, sans-serif;
+  color: #e9eef2;
+  background: #0e1418;
+  text-align: left;
+}
+.swing-lab * { box-sizing: border-box; }
+
+.swing-lab__stage { position: relative; overflow: hidden; background: #2a3a44; min-width: 0; }
+.swing-lab__stage canvas { display: block; }
+
+.swing-lab__top {
+  position: absolute; top: 0; left: 0; right: 0;
+  display: flex; align-items: center; gap: 12px; padding: 14px 18px;
+  background: linear-gradient(rgba(0, 0, 0, .45), transparent);
+  pointer-events: none;
+}
+.swing-lab__top > * { pointer-events: auto; }
+.swing-lab__top a { color: #9fd3ff; text-decoration: none; }
+.swing-lab__top h1 { font-size: 16px; margin: 0; font-weight: 600; letter-spacing: 0; color: inherit; }
+.swing-lab__licence { margin-left: auto; font-size: 12px; opacity: .7; }
+
+.swing-lab__hint {
+  position: absolute; bottom: 70px; left: 50%; transform: translateX(-50%);
+  font-size: 12px; opacity: .6; pointer-events: none; white-space: nowrap;
+}
+
+.swing-lab__bar {
+  position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 6px; padding: 6px;
+  background: rgba(10, 16, 20, .7); border: 1px solid #ffffff22; border-radius: 10px;
+}
+.swing-lab__bar button {
+  background: transparent; color: inherit; border: 0; padding: 7px 12px; border-radius: 6px;
+  font: inherit; cursor: pointer; white-space: nowrap;
+}
+.swing-lab__bar button:hover { background: #ffffff12; }
+.swing-lab__bar button[aria-pressed='true'] { background: #ffffff26; }
+.swing-lab__sep { width: 1px; background: #ffffff22; margin: 4px 2px; }
+
+.swing-lab__panel {
+  background: #141c21; border-left: 1px solid #ffffff18;
+  padding: 64px 16px 16px; overflow: auto;
+}
+.swing-lab__panel h2 {
+  font-size: 12px; text-transform: uppercase; letter-spacing: .08em; opacity: .6; margin: 18px 0 8px; color: inherit;
+}
+.swing-lab__bone {
+  display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; width: 100%;
+  padding: 7px 8px; border: 0; border-radius: 6px; background: transparent; color: inherit;
+  font: 13px system-ui, sans-serif; text-align: left; cursor: pointer;
+}
+.swing-lab__bone:hover, .swing-lab__bone[aria-selected='true'] { background: #ffffff10; }
+.swing-lab__bone[aria-selected='true'] { outline: 1px solid #ffcf3f88; }
+.swing-lab__value { font: 12px ui-monospace, monospace; opacity: .7; }
+.swing-lab__axis { display: flex; gap: 8px; align-items: center; font-size: 12px; margin: 6px 8px; }
+.swing-lab__axis input { flex: 1; }
+.swing-lab__axis output { width: 38px; font: 12px ui-monospace, monospace; text-align: right; }

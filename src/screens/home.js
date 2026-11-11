@@ -12,7 +12,8 @@ export function renderHome(root) {
     <img src="${viteLogo}" class="vite" alt="Vite logo" />
   </div>
   <div>
-    <h1>Get started</h1>
+    <h1>Ragdoll Golf</h1>
+    <p><a href="/swing-lab" data-link>Swing Lab →</a></p>
     <p>Edit <code>src/main.js</code> and save to test <code>HMR</code></p>
   </div>
   <button id="counter" type="button" class="counter"></button>

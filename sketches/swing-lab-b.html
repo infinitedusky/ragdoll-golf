@@ -1,0 +1,333 @@
+<!doctype html>
+<!-- SKETCH (RG-1) — made-up content. Variant B (chosen): 3D scene on the left, a skeleton panel on the right.
+     The golfer is a capsule mannequin standing in for the rigged GLB. three.js comes from a CDN; no build. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Swing Lab — sketch B</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; font: 14px/1.4 system-ui, sans-serif; color: #e9eef2; background: #0e1418; }
+  .stage { position: fixed; inset: 0 300px 0 0; overflow: hidden; background: #2a3a44; }
+  .stage canvas { display: block; }
+  .top { position: absolute; top: 0; left: 0; right: 0; display: flex; align-items: center; gap: 12px; padding: 14px 18px;
+    background: linear-gradient(rgba(0,0,0,.45), transparent); pointer-events: none; }
+  .top > * { pointer-events: auto; }
+  .top a { color: #9fd3ff; text-decoration: none; }
+  .top h1 { font-size: 16px; margin: 0; font-weight: 600; }
+  .top .tag { margin-left: auto; font-size: 12px; opacity: .7; }
+  .hint { position: absolute; bottom: 70px; left: 50%; transform: translateX(-50%); font-size: 12px; opacity: .6; pointer-events: none; }
+  .bar { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px;
+    background: rgba(10,16,20,.7); border: 1px solid #ffffff22; border-radius: 10px; padding: 6px; }
+  .bar button { background: transparent; color: inherit; border: 0; padding: 7px 12px; border-radius: 6px; font: inherit; cursor: pointer; white-space: nowrap; }
+  .bar button:hover { background: #ffffff12; }
+  .bar button.on { background: #ffffff26; }
+  .bar .sep { width: 1px; background: #ffffff22; margin: 4px 2px; }
+  .note { position: absolute; top: 60px; right: 18px; max-width: 230px; font-size: 12px; background: #fff3; color: #fff;
+    padding: 8px 10px; border-radius: 6px; border: 1px dashed #fff8; pointer-events: none; }
+  aside { position: fixed; top: 0; right: 0; bottom: 0; width: 300px; background: #141c21; border-left: 1px solid #ffffff18;
+    padding: 64px 16px 16px; overflow: auto; }
+  aside h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; opacity: .6; margin: 18px 0 8px; }
+  .bone { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; padding: 7px 8px; border-radius: 6px; font-size: 13px; }
+  .bone:hover, .bone.sel { background: #ffffff10; }
+  .bone .v { font: 12px ui-monospace, monospace; opacity: .7; }
+  .bone.sel { outline: 1px solid #ffcf3f88; }
+  .row { display: flex; gap: 8px; align-items: center; font-size: 12px; margin: 6px 8px; }
+  .row input { flex: 1; }
+  .row span { width: 38px; font: 12px ui-monospace, monospace; text-align: right; }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="top">
+    <a href="#">← Home</a>
+    <h1>Swing Lab</h1>
+    <span class="tag">at address · golfer.glb (CC0)</span>
+  </div>
+
+  <div class="note">Sketch: a capsule mannequin stands in for the rigged golfer. Views, orbit and Skeleton work; the bone panel doesn't yet.</div>
+
+  <div class="hint">drag to orbit · scroll to zoom · right-drag to pan</div>
+
+  <div class="bar">
+    <button data-view="face" class="on">Face-on</button>
+    <button data-view="dtl">Down the line</button>
+    <button data-view="top">Top</button>
+    <button data-view="club">Club head</button>
+    <span class="sep"></span>
+    <button id="skeleton">Skeleton</button>
+    <button data-view="face" id="reset">Reset view</button>
+  </div>
+</div>
+<aside>
+  <h2>Club</h2>
+  <div class="bone"><span>7-iron · 37″ · 34° loft · 62.5° lie</span><span class="v">in RightHand</span></div>
+  <h2>Skeleton · 24 bones</h2>
+  <div class="bone"><span>Hips</span><span class="v">0 · 0 · 0</span></div>
+  <div class="bone"><span>Spine</span><span class="v">28 · 0 · 0</span></div>
+  <div class="bone"><span>Spine2</span><span class="v">12 · 0 · 0</span></div>
+  <div class="bone"><span>Neck</span><span class="v">-20 · 0 · 0</span></div>
+  <div class="bone sel"><span>LeftArm</span><span class="v">62 · -8 · 4</span></div>
+  <div class="row">X <input type="range" value="62" min="-180" max="180"><span>62°</span></div>
+  <div class="row">Y <input type="range" value="-8" min="-180" max="180"><span>-8°</span></div>
+  <div class="row">Z <input type="range" value="4" min="-180" max="180"><span>4°</span></div>
+  <div class="bone"><span>LeftForeArm</span><span class="v">6 · 0 · 0</span></div>
+  <div class="bone"><span>LeftHand</span><span class="v">0 · 0 · 0</span></div>
+  <div class="bone"><span>RightArm</span><span class="v">58 · 10 · -6</span></div>
+  <div class="bone"><span>RightForeArm</span><span class="v">14 · 0 · 0</span></div>
+  <div class="bone"><span>RightHand</span><span class="v">0 · 0 · 0</span></div>
+  <div class="bone"><span>LeftUpLeg</span><span class="v">-18 · 0 · 4</span></div>
+  <div class="bone"><span>RightUpLeg</span><span class="v">-18 · 0 · -4</span></div>
+  <div class="bone"><span>… 12 more</span><span class="v"></span></div>
+</aside>
+
+<script type="module">
+import * as THREE from 'three'
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+
+// Right-handed golfer facing +Z, target line along +X (the golfer's left). Metres.
+const stage = document.getElementById('stage')
+const renderer = new THREE.WebGLRenderer({ antialias: true })
+renderer.setPixelRatio(devicePixelRatio)
+renderer.shadowMap.enabled = true
+renderer.shadowMap.type = THREE.PCFSoftShadowMap
+stage.prepend(renderer.domElement)
+
+const scene = new THREE.Scene()
+scene.background = new THREE.Color('#9fbfd4')
+scene.fog = new THREE.Fog('#9fbfd4', 18, 45)
+
+const camera = new THREE.PerspectiveCamera(35, 1, 0.05, 100)
+const controls = new OrbitControls(camera, renderer.domElement)
+controls.enableDamping = true
+controls.maxPolarAngle = Math.PI / 2 - 0.02
+controls.minDistance = 0.15
+controls.maxDistance = 15
+
+scene.add(new THREE.HemisphereLight('#dfefff', '#3b5a2c', 1.1))
+const sun = new THREE.DirectionalLight('#fff4e0', 2.4)
+sun.position.set(3, 6, 4)
+sun.castShadow = true
+sun.shadow.mapSize.set(2048, 2048)
+Object.assign(sun.shadow.camera, { left: -3, right: 3, top: 3, bottom: -3, near: 0.5, far: 20 })
+sun.shadow.bias = -0.0005
+scene.add(sun)
+
+// Ground: fairway with a mown stripe along the target line
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(80, 80), new THREE.MeshStandardMaterial({ color: '#4f8a3a', roughness: 1 }))
+ground.rotation.x = -Math.PI / 2
+ground.receiveShadow = true
+scene.add(ground)
+const stripe = new THREE.Mesh(new THREE.PlaneGeometry(80, 1.2), new THREE.MeshStandardMaterial({ color: '#5c9a45', roughness: 1 }))
+stripe.rotation.x = -Math.PI / 2
+stripe.position.set(0, 0.001, 0.95)
+stripe.receiveShadow = true
+scene.add(stripe)
+
+// The pose: joint positions at address
+const J = {
+  ankleL: [0.21, 0.08, 0.02], ankleR: [-0.21, 0.08, 0.02],
+  kneeL: [0.19, 0.5, 0.14], kneeR: [-0.19, 0.5, 0.14],
+  hipL: [0.11, 0.92, -0.1], hipR: [-0.11, 0.92, -0.1], pelvis: [0, 0.94, -0.1],
+  chest: [0, 1.33, 0.25], shoulderL: [0.2, 1.37, 0.24], shoulderR: [-0.2, 1.33, 0.27],
+  neck: [0, 1.44, 0.33], head: [0, 1.53, 0.43],
+  elbowL: [0.12, 1.06, 0.42], elbowR: [-0.12, 1.03, 0.44],
+  handL: [0.02, 0.795, 0.5], handR: [0.02, 0.725, 0.537],
+}
+for (const k in J) J[k] = new THREE.Vector3(...J[k])
+
+const skin = new THREE.MeshStandardMaterial({ color: '#d9b896', roughness: 0.7, transparent: true })
+const shirt = new THREE.MeshStandardMaterial({ color: '#3f6c9e', roughness: 0.8, transparent: true })
+const pants = new THREE.MeshStandardMaterial({ color: '#2d3640', roughness: 0.85, transparent: true })
+const shoe = new THREE.MeshStandardMaterial({ color: '#f2f2f2', roughness: 0.5, transparent: true })
+const body = new THREE.Group()
+scene.add(body)
+
+const Y = new THREE.Vector3(0, 1, 0)
+function limb(a, b, r, mat) {
+  const dir = new THREE.Vector3().subVectors(J[b] ?? b, J[a] ?? a)
+  const m = new THREE.Mesh(new THREE.CapsuleGeometry(r, Math.max(dir.length() - r, 0.01), 6, 16), mat)
+  m.position.copy(J[a] ?? a).addScaledVector(dir, 0.5)
+  m.quaternion.setFromUnitVectors(Y, dir.normalize())
+  m.castShadow = m.receiveShadow = true
+  body.add(m)
+  return m
+}
+function ball(p, r, mat, parent = body) {
+  const m = new THREE.Mesh(new THREE.SphereGeometry(r, 24, 16), mat)
+  m.position.copy(J[p] ?? p)
+  m.castShadow = m.receiveShadow = true
+  parent.add(m)
+  return m
+}
+
+limb('ankleL', 'kneeL', 0.06, pants); limb('kneeL', 'hipL', 0.075, pants)
+limb('ankleR', 'kneeR', 0.06, pants); limb('kneeR', 'hipR', 0.075, pants)
+limb('hipL', 'hipR', 0.11, pants)
+limb('pelvis', 'chest', 0.15, shirt)
+limb('shoulderL', 'shoulderR', 0.08, shirt)
+limb('chest', 'neck', 0.05, skin)
+limb('shoulderL', 'elbowL', 0.05, shirt); limb('elbowL', 'handL', 0.042, skin)
+limb('shoulderR', 'elbowR', 0.05, shirt); limb('elbowR', 'handR', 0.042, skin)
+ball('handL', 0.045, skin); ball('handR', 0.045, skin)
+const head = ball('head', 0.11, skin)
+head.scale.set(0.9, 1.05, 1)
+const cap = new THREE.Mesh(new THREE.SphereGeometry(0.115, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), shirt)
+cap.position.copy(J.head); cap.rotation.x = 0.5; cap.castShadow = true
+body.add(cap)
+for (const [a, side] of [['ankleL', 1], ['ankleR', -1]]) {
+  const f = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.07, 0.27), shoe)
+  f.position.copy(J[a]).add(new THREE.Vector3(0.02 * side, -0.045, 0.06))
+  f.rotation.y = 0.2 * side
+  f.castShadow = f.receiveShadow = true
+  body.add(f)
+}
+
+// Club: a 7-iron, built in its own frame — origin at the heel of the sole, face toward +X (target),
+// toe toward +Z (away from the golfer), shaft rising toward the golfer at the lie angle.
+const DEG = Math.PI / 180
+const LOFT = 34 * DEG, LIE = 62.5 * DEG, LENGTH = 0.94 // 37″
+const club = new THREE.Group()
+const chrome = new THREE.MeshStandardMaterial({ color: '#d4d8dc', metalness: 0.55, roughness: 0.22 })
+const satin = new THREE.MeshStandardMaterial({ color: '#b9bec3', metalness: 0.45, roughness: 0.45 })
+const rubber = new THREE.MeshStandardMaterial({ color: '#1d1d1d', roughness: 0.9 })
+const groove = new THREE.MeshStandardMaterial({ color: '#4a4f54', metalness: 0.3, roughness: 0.6 })
+
+// Head: blade profile seen face-on (x: heel→toe, y: sole→top line), low heel, taller rounded toe
+const profile = new THREE.Shape()
+profile.moveTo(0.0, 0.004)
+profile.quadraticCurveTo(0.002, 0.0, 0.012, 0.0)
+profile.lineTo(0.064, 0.001)
+profile.quadraticCurveTo(0.08, 0.003, 0.08, 0.024)
+profile.quadraticCurveTo(0.079, 0.046, 0.064, 0.048)
+profile.lineTo(0.014, 0.034)
+profile.quadraticCurveTo(0.003, 0.031, 0.0, 0.024)
+profile.lineTo(0.0, 0.004)
+const headGeo = new THREE.ExtrudeGeometry(profile, { depth: 1, bevelEnabled: false, curveSegments: 16 })
+// Map extrusion depth to the back of the head: sole ~22 mm wide, top line ~8 mm, face sheared back by the loft
+const pos = headGeo.attributes.position
+for (let i = 0; i < pos.count; i++) {
+  const u = pos.getX(i), v = pos.getY(i), d = pos.getZ(i)
+  const thick = 0.022 - 0.014 * Math.min(v / 0.045, 1)
+  pos.setXYZ(i, -v * Math.tan(LOFT) - d * thick, v, u)
+}
+headGeo.computeVertexNormals()
+const head7 = new THREE.Mesh(headGeo, chrome)
+head7.castShadow = head7.receiveShadow = true
+club.add(head7)
+
+// Face grooves: thin lines lying on the lofted face, across the centre of the blade
+for (let i = 0; i < 9; i++) {
+  const y = 0.006 + i * 0.0038
+  const g = new THREE.Mesh(new THREE.BoxGeometry(0.0004, 0.0007, 0.046), groove)
+  g.position.set(-y * Math.tan(LOFT) + 0.0002, y, 0.04)
+  g.rotation.z = LOFT
+  club.add(g)
+}
+
+// Hosel, shaft and grip along the shaft line
+const up = new THREE.Vector3(0, Math.sin(LIE), -Math.cos(LIE))
+const base = new THREE.Vector3(-0.006, 0.006, 0.0)
+function along(r0, r1, from, to, mat) {
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(r1, r0, to - from, 16), mat)
+  m.position.copy(base).addScaledVector(up, (from + to) / 2)
+  m.quaternion.setFromUnitVectors(Y, up)
+  m.castShadow = true
+  club.add(m)
+  return m
+}
+along(0.0078, 0.0068, 0, 0.065, chrome)                 // hosel
+along(0.0048, 0.0075, 0.065, LENGTH - 0.26, satin)      // shaft, tapering toward the head
+along(0.0098, 0.0118, LENGTH - 0.27, LENGTH, rubber)    // grip
+const butt = new THREE.Mesh(new THREE.CircleGeometry(0.0118, 16), rubber)
+butt.position.copy(base).addScaledVector(up, LENGTH)
+butt.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), up)
+club.add(butt)
+
+// Place the club so its sole rests on the ground and the hands hold the grip
+club.position.set(0.026, 0, 0.906)
+scene.add(club)
+club.updateMatrixWorld()
+
+// Ball: on the ground, just in front of the face centre
+const faceCentre = club.localToWorld(new THREE.Vector3(-0.0214 * Math.tan(LOFT), 0.0214, 0.04))
+const golfBall = new THREE.Mesh(new THREE.SphereGeometry(0.0214, 32, 24), new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.35 }))
+golfBall.position.set(faceCentre.x + 0.0214 + 0.003, 0.0214, faceCentre.z)
+golfBall.castShadow = true
+scene.add(golfBall)
+
+// Skeleton overlay: joints and bones, drawn through the body
+const skel = new THREE.Group()
+skel.visible = false
+scene.add(skel)
+const jointMat = new THREE.MeshBasicMaterial({ color: '#ffcf3f', depthTest: false })
+for (const k in J) { const s = new THREE.Mesh(new THREE.SphereGeometry(0.022, 12, 8), jointMat); s.position.copy(J[k]); s.renderOrder = 2; skel.add(s) }
+const bones = [['ankleL','kneeL'],['kneeL','hipL'],['ankleR','kneeR'],['kneeR','hipR'],['hipL','pelvis'],['hipR','pelvis'],['pelvis','chest'],
+  ['chest','neck'],['neck','head'],['chest','shoulderL'],['chest','shoulderR'],['shoulderL','elbowL'],['elbowL','handL'],['shoulderR','elbowR'],['elbowR','handR']]
+const lines = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(bones.flatMap(([a, b]) => [J[a], J[b]])),
+  new THREE.LineBasicMaterial({ color: '#ffcf3f', depthTest: false }))
+lines.renderOrder = 1
+skel.add(lines)
+document.getElementById('skeleton').onclick = (e) => {
+  skel.visible = !skel.visible
+  e.currentTarget.classList.toggle('on', skel.visible)
+  for (const m of [skin, shirt, pants, shoe]) m.opacity = skel.visible ? 0.3 : 1
+}
+
+// Camera views
+const views = {
+  face: { pos: [0, 1.15, 4.6], target: [0, 0.8, 0.35] },   // in front of the golfer, square to the chest
+  dtl:  { pos: [-4.8, 1.25, 0.75], target: [0, 0.75, 0.6] }, // behind the hands, looking down the target line
+  top:  { pos: [0, 6, 0.42], target: [0, 0, 0.4] },
+  club: { pos: [0.32, 0.1, 1.12], target: [0.02, 0.02, 0.95] }, // close on the head and ball, from the target side
+}
+let tween = null
+function goTo(name, instant = false) {
+  const v = views[name]
+  const to = { pos: new THREE.Vector3(...v.pos), target: new THREE.Vector3(...v.target) }
+  if (instant) { camera.position.copy(to.pos); controls.target.copy(to.target); return }
+  tween = { from: { pos: camera.position.clone(), target: controls.target.clone() }, to, t0: performance.now(), ms: 700 }
+}
+for (const b of document.querySelectorAll('[data-view]')) {
+  b.onclick = () => {
+    goTo(b.dataset.view)
+    for (const o of document.querySelectorAll('.bar [data-view]')) o.classList.toggle('on', o.dataset.view === b.dataset.view && o.id !== 'reset')
+  }
+}
+controls.addEventListener('start', () => {
+  tween = null
+  for (const o of document.querySelectorAll('.bar [data-view]')) o.classList.remove('on')
+})
+const startView = views[location.hash.slice(1)] ? location.hash.slice(1) : 'face'
+goTo(startView, true)
+for (const o of document.querySelectorAll('.bar [data-view]')) o.classList.toggle('on', o.dataset.view === startView && o.id !== 'reset')
+
+function resize() {
+  const { clientWidth: w, clientHeight: h } = stage
+  renderer.setSize(w, h)
+  camera.aspect = w / h
+  camera.updateProjectionMatrix()
+}
+new ResizeObserver(resize).observe(stage)
+resize()
+
+renderer.setAnimationLoop((now) => {
+  if (tween) {
+    const k = Math.min((now - tween.t0) / tween.ms, 1)
+    const e = k < 0.5 ? 4 * k * k * k : 1 - (-2 * k + 2) ** 3 / 2
+    camera.position.lerpVectors(tween.from.pos, tween.to.pos, e)
+    controls.target.lerpVectors(tween.from.target, tween.to.target, e)
+    if (k === 1) tween = null
+  }
+  controls.update()
+  renderer.render(scene, camera)
+})
+</script>
+</body>
+</html>

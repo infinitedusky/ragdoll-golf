@@ -1,0 +1,61 @@
+// PROTOTYPE (RG-1): the address pose, solved by scripts/solve-address.mjs (body by hand, arms by two-bone IK).
+// Local Euler XYZ in degrees, by bone name without the mixamorig: prefix. Bones not listed stay at bind (0, 0, 0).
+export const ADDRESS_POSE = {
+  Hips: [28, 0, 0],
+  Spine: [10, 0, 9],
+  Spine1: [6, 0, 6],
+  Spine2: [4, 0, 4],
+  Neck: [-14, 0, -8],
+  Head: [-14, 0, -10],
+  LeftShoulder: [0, -10, -12],
+  LeftArm: [-44.3, 8.9, -92.3],
+  LeftForeArm: [0, -41.7, 0],
+  LeftHand: [-14.7, 6.9, 4.8],
+  RightShoulder: [0, 30, 26],
+  RightArm: [-52.2, 23.2, 56.6],
+  RightForeArm: [0, 25.7, 0],
+  RightHand: [6.9, -13.9, -17.5],
+  LeftUpLeg: [-50, 0, 7],
+  LeftLeg: [34, 0, 0],
+  LeftFoot: [-12, -8, -7],
+  RightUpLeg: [-50, 0, -7],
+  RightLeg: [34, 0, 0],
+  RightFoot: [-12, 8, 7],
+  // Fingers wrap the grip: bend about Z toward the palm (left −Z, right +Z)
+  LeftHandIndex1: [0, 4, -55],
+  LeftHandIndex2: [0, 0, -75],
+  LeftHandIndex3: [0, 0, -45],
+  LeftHandMiddle1: [0, 0, -55],
+  LeftHandMiddle2: [0, 0, -75],
+  LeftHandMiddle3: [0, 0, -45],
+  LeftHandRing1: [0, -4, -55],
+  LeftHandRing2: [0, 0, -75],
+  LeftHandRing3: [0, 0, -45],
+  LeftHandPinky1: [0, -8, -55],
+  LeftHandPinky2: [0, 0, -75],
+  LeftHandPinky3: [0, 0, -45],
+  LeftHandThumb1: [20, 25, -10],
+  LeftHandThumb2: [0, 0, -25],
+  LeftHandThumb3: [0, 0, -20],
+  RightHandIndex1: [0, -4, 55],
+  RightHandIndex2: [0, 0, 75],
+  RightHandIndex3: [0, 0, 45],
+  RightHandMiddle1: [0, 0, 55],
+  RightHandMiddle2: [0, 0, 75],
+  RightHandMiddle3: [0, 0, 45],
+  RightHandRing1: [0, 4, 55],
+  RightHandRing2: [0, 0, 75],
+  RightHandRing3: [0, 0, 45],
+  RightHandPinky1: [0, 8, 55],
+  RightHandPinky2: [0, 0, 75],
+  RightHandPinky3: [0, 0, 45],
+  RightHandThumb1: [-20, -25, 10],
+  RightHandThumb2: [0, 0, 25],
+  RightHandThumb3: [0, 0, 20],
+}
+
+// Where the model root stands, metres (feet on the ground, left arm nearly straight)
+export const GOLFER_ROOT = [0, -0.0539, 0.0867]
+
+// The club in the RightHand bone frame (that frame is in centimetres: the GLB root scales by 0.01)
+export const CLUB_IN_RIGHT_HAND = {position: [-95.799,-3.163,4.959],quaternion: [0.13753,-0.19828,-0.67874,0.6936],scale: 100}
