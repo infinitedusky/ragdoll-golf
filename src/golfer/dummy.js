@@ -2,7 +2,9 @@
 // Rest pose: standing, arms down, palms in, facing +Z, left side at +X, metres. Every bone's rest rotation
 // is identity, so a bone's local X/Y/Z are the world axes until a parent rotates.
 // "Lead" is the left side (+X) and "trail" the right (−X), for a right-handed golfer.
-// The pelvis is the root: a centre plus two hip joints as children.
+// The pelvis is the root: a centre plus two hip joints as children. Each arm starts with a shoulder girdle
+// (collarbone / shoulder blade) between the upper back and the shoulder joint: Y swings the shoulder
+// forward and back, Z lifts and drops it (for the lead side +Y is back and +Z is up; mirrored for the trail side).
 import * as THREE from 'three'
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js'
 
@@ -20,7 +22,8 @@ const DEFS = [
 for (const [side, s] of Object.entries(SIDES)) {
   const G = side === 'lead' ? 'Lead' : 'Trail'
   DEFS.push(
-    [side + 'Shoulder', 'upperBack', [0.2 * s, 0.22, 0], G + ' arm', 'Shoulder'],
+    [side + 'Girdle', 'upperBack', [0.06 * s, 0.22, 0], G + ' arm', 'Shoulder girdle'],
+    [side + 'Shoulder', side + 'Girdle', [0.14 * s, 0, 0], G + ' arm', 'Shoulder'],
     [side + 'Elbow', side + 'Shoulder', [0, -0.29, 0], G + ' arm', 'Elbow'],
     [side + 'Wrist', side + 'Elbow', [0, -0.27, 0], G + ' arm', 'Wrist'],
     [side + 'Hip', 'pelvis', [0.11 * s, -0.02, 0], G + ' leg', 'Hip'],
@@ -99,6 +102,12 @@ export function buildDummy() {
     // Arms: ball joint, segment, ball joint, segment, ball joint, black mitten (palm faces inward at rest)
     seg(side + 'Shoulder', V(0, 0, 0), off(side + 'Elbow'), 0.055, 0.048, yellow)
     seg(side + 'Elbow', V(0, 0, 0), off(side + 'Wrist'), 0.046, 0.038, yellow, 0.035)
+    // Shoulder bracket: a black joint at the girdle's root and a bolted black plate out to the shoulder
+    joint(side + 'Girdle', 0.04)
+    add(side + 'Girdle', new THREE.Mesh(new RoundedBoxGeometry(0.14, 0.045, 0.075, 3, 0.015), black), V(0.07 * s, 0, 0))
+    for (const dz of [-0.022, 0.022]) {
+      add(side + 'Girdle', new THREE.Mesh(new THREE.CylinderGeometry(0.01, 0.01, 0.008, 12), bolt), V(0.075 * s, 0.0245, dz))
+    }
     joint(side + 'Shoulder', 0.065); joint(side + 'Elbow', 0.05); joint(side + 'Wrist', 0.034)
     add(side + 'Wrist', new THREE.Mesh(new RoundedBoxGeometry(0.04, 0.1, 0.08, 3, 0.018), black), V(0, -0.055, 0))
     // Bolt caps on the outside of each elbow and knee

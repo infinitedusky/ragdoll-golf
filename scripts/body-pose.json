@@ -3,10 +3,11 @@
  "reach": 0.96,
  "footYawDeg": { "lead": 14, "trail": -8 },
  "bones": {
-  "pelvis": [30, 0, 0],
-  "lowerBack": [5, 8, 6], "upperBack": [3, 10, 5],
+  "pelvis": [32, 0, 0],
+  "lowerBack": [5, 0, 6], "upperBack": [3, 0, 5],
   "neck": [-14, 0, -6], "head": [-10, 0, -4],
-  "leadHip": [-48, 0, 7], "trailHip": [-48, 0, -7],
+  "leadGirdle": [0, 20, 0], "trailGirdle": [0, 30, 20],
+  "leadHip": [-50, 0, 7], "trailHip": [-50, 0, -7],
   "leadKnee": [34, 0, 0], "trailKnee": [34, 0, 0]
  }
 }

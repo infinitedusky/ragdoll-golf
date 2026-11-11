@@ -15,11 +15,12 @@ Code:
 
 We own the skeleton, so there is no licence question and no scale, facing or ground fixing.
 
-- **17 `THREE.Bone`s**, plain camelCase names, defined as a table of `[name, parent, offset, panel group, label]`.
+- **19 `THREE.Bone`s**, plain camelCase names, defined as a table of `[name, parent, offset, panel group, label]`.
 - **The pelvis is the root**: a centre bone with two hip joints as children, so tilting the pelvis carries the legs with it (see 2).
 - **Rest pose: standing, arms down, palms in.** Every bone's rest rotation is identity, so at rest a bone's local X/Y/Z are the world axes and joint motion is measured from a neutral stance, not a T-pose.
 - Conventions hold: faces +Z, target along +X, metres. **Lead is the left side (+X)**, trail the right (−X), for a right-handed golfer.
 - Look: yellow rigid segments, black ball joints, a stacked rubber neck, mitten hands, ribs, bolt caps and quadrant markers. Each is attached to a bone, so rotating a bone moves everything below it. It cost about 100 lines.
+- **Shoulder girdle (round 3):** each arm starts with a girdle bone (collarbone / shoulder blade) between the upper back and the shoulder joint, shown as a black bolted bracket. Y swings the shoulder forward and back (chest/back squeeze), Z lifts and drops it (traps). The signs mirror between sides: on the lead side +Y is back and +Z is up, on the trail side +Y is forward and +Z is down. The girdle root is 6 cm out from the spine and the shoulder joint 14 cm beyond it, so the shoulder rests where it did before.
 - No finger bones: mittens. This is why the hands now look right at the grip, where X Bot's fingers needed a hand-guessed curl and one thumb poked out.
 
 | Group | Bones, from the body outward |
@@ -27,41 +28,43 @@ We own the skeleton, so there is no licence question and no scale, facing or gro
 | Pelvis | pelvis |
 | Torso | lowerBack, upperBack |
 | Head | neck, head |
-| Lead arm / Trail arm | shoulder, elbow, wrist |
+| Lead arm / Trail arm | shoulder girdle, shoulder, elbow, wrist |
 | Lead leg / Trail leg | hip, knee, ankle |
 
 ## 2. Posing address
 
 The body angles are set by hand (`scripts/body-pose.json`). The arms are solved by **analytic two-bone IK** onto the grip, on the dummy's own bones. The stance is then found by searching the pelvis along Z until the longer arm is at 96% of a straight arm. The solver imports `dummy.js`, so what it solves is exactly the skeleton the screen uses.
 
-- **Torso lean 37°** from vertical (neck over pelvis), inside the brief's 35–40°. It is the sum of pelvis 30° + lower back 5° + upper back 3°. The pelvis also carries the legs forward, so the hips counter with −48° and the thighs end up 18° ahead of vertical.
-- **The dummy needs about 18° of upper-body turn** (lower back Y 8°, upper back Y 10°, shoulders slightly open) to get both arms to the grip. The trail hand is 9 cm lower on the shaft, and with no clavicle bone the shoulders can't reach for it. Without the turn the lead elbow bends about 70°. Side-bend (Z 6° and 5°, away from the target) lowers the trail shoulder. That is the main thing that makes the brief's "both hands on the grip" hard: **the pose needs spine turn and side-bend, not just arm angles.**
-- Both elbows end up bent about 33–37° at address, not locked straight. A straight lead arm would need a longer arm or a smaller turn.
+- **Torso lean 37°** from vertical (neck over pelvis), inside the brief's 35–40°. It is the sum of pelvis 32° + lower back 5° + upper back 3°. The pelvis also carries the legs forward, so the hips counter with −50° and the thighs end up 18° ahead of vertical.
+- **The girdles replace the 18° of spine turn (round 3).** The trail hand sits 9 cm lower on the shaft, so the trail shoulder has to be lower and further forward than the lead. With no girdle that took 18° of upper-body turn (lower back Y 8°, upper back Y 10°). Now the spine has **no turn**, and the trail girdle does it: **forward 30° and down 20°**, with the lead girdle **back 20°** to let the lead arm straighten. Both arms reach the grip at 95–96% of a straight arm (elbows bent 32° lead, 36° trail). Spine side-bend (Z 6° and 5°, away from the target) stays; it is what tilts the shoulders.
+- **Two bones carry one job**, so the pose is not unique: a girdle shift and a spine turn are interchangeable to the solver. The girdle angles above are hand-picked. The build should pick one default and treat the girdle as the small adjustment, not the way to reach the club.
 - Ankles are computed, not hand-set: each is levelled in world space with a toe-out (lead +14°, trail −8°) so both soles sit flat at ankle height 0.08 m. That makes the ankle's local angles a function of pelvis, hip and knee, so the table below holds only for this stance.
 
 ### Address pose (local Euler XYZ, degrees, from rest; unlisted bones stay at 0)
 
 | Group | Bone | X | Y | Z |
 |---|---|---|---|---|
-| Pelvis | pelvis | 30 | 0 | 0 |
-| Torso | lowerBack | 5 | 8 | 6 |
-| | upperBack | 3 | 10 | 5 |
+| Pelvis | pelvis | 32 | 0 | 0 |
+| Torso | lowerBack | 5 | 0 | 6 |
+|  | upperBack | 3 | 0 | 5 |
 | Head | neck | −14 | 0 | −6 |
-| | head | −10 | 0 | −4 |
-| Lead arm | leadShoulder | −63.2 | −36.6 | −24.1 |
-| | leadElbow | −36.6 | 0 | 0 |
-| | leadWrist | 15.7 | 33.4 | 10.2 |
-| Trail arm | trailShoulder | −44.8 | 49.9 | −12.8 |
-| | trailElbow | −32.5 | 0 | 0 |
-| | trailWrist | 15.2 | −48.8 | −26.3 |
-| Lead leg | leadHip | −48 | 0 | 7 |
-| | leadKnee | 34 | 0 | 0 |
-| | leadAnkle | −14.5 | 11.7 | −6.8 |
-| Trail leg | trailHip | −48 | 0 | −7 |
-| | trailKnee | 34 | 0 | 0 |
-| | trailAnkle | −15.2 | −5.8 | 6.7 |
+|  | head | −10 | 0 | −4 |
+| Lead arm | leadGirdle | 0 | 20 | 0 |
+|  | leadShoulder | −67.2 | −30.9 | −27.1 |
+|  | leadElbow | −32.5 | 0 | 0 |
+|  | leadWrist | 18.1 | 29.8 | 7.5 |
+| Trail arm | trailGirdle | 0 | 30 | 20 |
+|  | trailShoulder | −31.5 | 45.9 | −44.8 |
+|  | trailElbow | −36.3 | 0 | 0 |
+|  | trailWrist | 29.3 | −40.2 | −16.1 |
+| Lead leg | leadHip | −50 | 0 | 7 |
+|  | leadKnee | 34 | 0 | 0 |
+|  | leadAnkle | −14.5 | 11.7 | −6.8 |
+| Trail leg | trailHip | −50 | 0 | −7 |
+|  | trailKnee | 34 | 0 | 0 |
+|  | trailAnkle | −15.2 | −5.8 | 6.7 |
 
-The pelvis stands at `[0, 0.895, 0.020]` m.
+The pelvis stands at `[0, 0.895, -0.030]` m.
 
 ## 3. The club in the hand
 
@@ -79,16 +82,17 @@ Smooth: the sliders respond immediately, the club follows the trail wrist, and t
 - **Y** twists the bone about its own length.
 - **Z** rolls it sideways. Positive Z on a down-pointing leg or arm swings it toward +X (the lead side).
 - Elbow and knee are single-axis hinges (X only). The spine, neck and legs read naturally.
-- The **shoulders are still the hard ones**. The solver chooses the upper-arm twist from where the elbow points, so the address shoulder values (−63 / −37 / −24) are correct but not something a person would type. The wrist is the same (Y 33°, 49°).
+- The girdle sliders are easy to read once you know the mirroring (Y forward/back, Z up/down, signs flipped between sides); the panel shows only numbers, so the sign is the confusing part.
+- The **shoulders are still the hard ones**. The solver chooses the upper-arm twist from where the elbow points, so the address shoulder values (lead −67 / −31 / −27) are correct but not something a person would type. The wrist is the same (Y 33°, 49°).
 - Euler XYZ is fine as the storage format (a flat name → degrees table round-trips cleanly). The build should label each slider by what it does per bone (bend / twist / roll), which is RG-2's job.
 
 ## 5. What makes the brief wrong, or needs adding
 
-- **"Shoulder" as a single ball joint is the limit.** Both arms need upper-body turn to reach the grip. RG-2 should decide whether to add a collar (clavicle) bone per side. Without it, the address pose depends on 18° of spine turn.
+- **The brief's shoulder needs the girdle.** A single ball joint could not reach both hands to the grip without 18° of spine turn. The girdle (forward/back and up/down) fixes it, so the build's skeleton and panel should include it from the start. What is left for RG-2 is its limits, and whether the two girdle sliders get golf names ("shoulder forward", "shoulder drop").
 - The pose is a **name → degrees table plus a pelvis position**, and the pelvis position is part of the pose (the stance is searched, not typed).
 - "Ankle" angles can't be a fixed default: they depend on pelvis, hips and knees. Store the foot yaw and level the soles in code, or recompute them when the pelvis changes.
 - The brief's "spine tilted forward about 35–40°" is a **torso angle** (neck over pelvis), not a Spine rotation. State it that way.
 - Keeping the lead hand on the grip and the feet planted is runtime IK (RG-3). The posed table alone does not stay valid once a slider moves.
 - The **Skeleton** toggle needs more than `SkeletonHelper`: it draws bone lines only, so the build adds a joint ball per bone to match the mockup.
-- Panel size is no longer an issue: 17 bones in 7 groups fit without a filter.
+- Panel size is no longer an issue: 19 bones in 7 groups fit without a filter.
 - Still faked: a free-standing screenshot hook (`window.__cam`), no resource disposal for the dummy, no tests, no Storybook story or Game-map node.
